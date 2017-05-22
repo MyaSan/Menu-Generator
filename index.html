@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+
+	<title>Menu Generator</title>
+	<!-- <link rel="stylesheet" type="text/css" href="css/bulma-docs.css"> -->
+</head>
+<body>
+	<p class="control">
+			<input class="input" type="text" placeholder="Add Menu" id="menu" name="menu" >
+		</p>
+
+		<p class="control">
+			<input type="submit" name="add" id="add" value="Add Menu" />
+		</p>
+	<ol class="sortable">
+	</ol>
+
+	<p>
+		<input type="submit" name="save" id="save" value="Save" />
+		<input type="submit" name="preview" id="preview" value="Preview" />
+	<pre id="toHierarchyOutput"></pre>
+
+<script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="js/jquery-tohierarchy.mjs.nestedSortable.js"></script>
+
+<script>
+
+	$(document).ready(function(){
+		var count = 0;
+		$('#add').click(function() {
+
+			if($('#menu').val()) {
+				count++;
+				var name = $('#menu').val();
+				$('<li id="list_1">').append($('<span>').text($('#menu').val())).append('<a class="delete" id="menu_delete" onclick="remove()"></a>').appendTo('.sortable');
+			}
+
+			$('#menu').val('').focus();
+		});
+
+		$("#menu").keydown(function(e) {
+			if(e.which == 13)
+				$("#add").click();
+	    });
+
+	    $('#save').click(function() {
+			hiered = $('ol.sortable').nestedSortable('toHierarchy', {startDepthCount: 0});
+			hiered = dump(hiered);
+			(typeof($('#toHierarchyOutput')[0].textContent) != 'undefined') ?
+			$('#toHierarchyOutput')[0].textContent = hiered : $('#toHierarchyOutput')[0].innerText = hiered;
+	    });
+
+	    $('#preview').click(function() {
+	    	window.location.href="menudrop.html";
+	    });
+
+		$('ol.sortable').nestedSortable({
+			forcePlaceholderSize: true,
+			helper:	'clone',
+			items: 'li',
+			opacity: .6,
+			placeholder: 'placeholder',
+			revert: 250,
+			tabSize: 25,
+			tolerance: 'pointer',
+			listType: 'ol',
+			maxLevels: 3,
+			isTree: true,
+			expandOnHover: 700,
+			startCollapsed: true
+		});
+
+	});
+
+	function dump(arr,level) {
+		var dumped_text = "";
+		if(!level) level = 0;
+
+		var level_padding = "";
+		for(var j=0;j<level+1;j++) level_padding += "    ";
+
+		if(typeof(arr) == 'object') {
+			for(var item in arr) {
+				var value = arr[item];
+
+				if(typeof(value) == 'object') {
+					dumped_text += level_padding + "'" + item + "' ...\n";
+					dumped_text += dump(value,level+1);
+				} else {
+					dumped_text += level_padding + "'" + item + "' => \"" + value + "\"\n";
+				}
+			}
+		} else {
+			dumped_text = "===>"+arr+"<===("+typeof(arr)+")";
+		}
+		return dumped_text;
+	}
+
+</script>
